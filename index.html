@@ -1,261 +1,643 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>HDFC Deposit Slip Generator</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#eee;min-height:100vh}
+  <meta charset="UTF-8">
+  <title>HDFC Deposit Slip Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
 
-.hdr{background:#004B87;color:#fff;padding:12px 20px}
-.hdr h1{font-size:16px}.hdr p{font-size:10px;opacity:.7;margin-top:2px}
-.ubar{display:flex;justify-content:space-between;align-items:center;padding:10px 20px;background:#fff;border-bottom:2px solid #ddd}
-.ubar .i{font-size:13px;font-weight:700;color:#004B87}
-.ubar .a{display:flex;gap:6px}
-.bt{padding:7px 18px;border:none;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;display:inline-block}
-.bt-p{background:#004B87;color:#fff}.bt-p:disabled{background:#ccc;cursor:default}
-.bt-r{background:#ED1C24;color:#fff}.bt-o{background:#fff;color:#004B87;border:2px solid #004B87}
-.uz{border:2px dashed #004B87;border-radius:8px;padding:36px;text-align:center;background:#fff;cursor:pointer;margin:20px}
-.cd{background:#fff;border-radius:6px;padding:14px;border:1px solid #ddd;margin:0 20px 12px}
-.cd h3{font-size:12px;font-weight:700;color:#004B87;margin-bottom:8px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
-.fl{font-size:10px;font-weight:600;color:#666;display:block}
-select,input[type=text]{width:100%;padding:5px;border:1px solid #ccc;border-radius:3px;font-size:11px;margin-top:2px}
-select.ok{background:#efffef}
-.st{width:100%;border-collapse:collapse;font-size:10px}
-.st th{padding:4px 6px;text-align:left;border-bottom:2px solid #004B87;font-size:9px}
-.st td{padding:4px 6px;border-bottom:1px solid #eee}
-.sa{padding:16px 20px}
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #eee;
+      min-height: 100vh
+    }
 
-/* Preset buttons */
-.presets{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
-.pre-btn{padding:6px 14px;border:2px solid #004B87;border-radius:20px;font-size:10px;font-weight:600;cursor:pointer;background:#fff;color:#004B87;transition:all .15s}
-.pre-btn:hover,.pre-btn.active{background:#004B87;color:#fff}
+    .hdr {
+      background: #004B87;
+      color: #fff;
+      padding: 12px 20px
+    }
 
-/* ═══ SLIP ═══ */
-.slip{display:flex;border:1.5pt solid #000;background:#fff;margin-bottom:20px;font-family:'Times New Roman',Times,serif;color:#000;font-size:10px;line-height:1.35}
-.SL{width:400px;padding:10px 14px;border-right:1.5pt dashed #888;position:relative}
-.SR{flex:1;padding:10px 14px;position:relative}
-.pf{font-size:7px;color:#888;margin-bottom:6px}.pf::before{content:'◄ '}
-.hh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
-.bn{font-size:13px;font-weight:bold;font-family:'Arial Black',Arial,sans-serif}
-.bs{font-size:6px;color:#555;font-style:italic}
-.tt-m{font-weight:bold;font-size:10px}.tt-s{font-size:7px}
-.DB{display:inline-flex;margin-top:2px}
-.DB .c{width:19px;height:19px;border:1.2pt solid #000;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;font-family:'Courier New',monospace}
-.BG{display:flex;margin:3px 0}
-.BG .b{width:21px;height:21px;border:1.2pt solid #000;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;font-family:'Courier New',monospace}
-.BG .sp{width:6px}
-.lb{font-size:8.5px;font-weight:bold;margin-bottom:1px;margin-top:5px}
-.nl{border-bottom:1pt solid #000;min-height:18px;font-size:12px;font-weight:bold;padding:2px 0;margin-bottom:6px}
-.LT{width:100%;border-collapse:collapse;margin-bottom:2px}
-.LT th,.LT td{border:1pt solid #000;padding:3px 4px;vertical-align:top;font-size:8.5px}
-.LT th{font-size:7.5px;font-weight:bold;text-align:left}
-.LT .vv{font-weight:bold;font-size:11px;font-family:'Courier New',monospace}
-.RT{width:100%;border-collapse:collapse;margin-bottom:2px}
-.RT th,.RT td{border:1pt solid #000;padding:3px 4px;vertical-align:middle;font-size:8.5px}
-.RT th{font-size:7px;font-weight:bold;text-align:left}
-.RT .vv{font-weight:bold;font-size:10px;font-family:'Courier New',monospace}
-.aw{margin-top:4px;font-size:8.5px}.aw b{font-weight:bold}.aw .h{font-size:7px;color:#444;border-bottom:1pt solid #000;min-height:12px;display:block;margin-top:1px}
-.sg{display:flex;justify-content:space-between;margin-top:20px}.sg-b{text-align:center;flex:1}.sg-l{border-top:1pt solid #000;padding-top:3px;font-size:7px}
-.bn2{font-size:6px;color:#444;margin-top:6px}
-.pn{font-size:6px;color:#333;margin-top:4px;text-align:right}
-.sr{font-size:6px;color:#888;margin-top:8px}
+    .hdr h1 {
+      font-size: 16px
+    }
 
-@media print{.np{display:none!important}.sa{padding:0}body{background:#fff;padding:0}.slip{page-break-after:always;margin:0}.slip:last-child{page-break-after:auto}}
-</style>
+    .hdr p {
+      font-size: 10px;
+      opacity: .7;
+      margin-top: 2px
+    }
+
+    .ubar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: #fff;
+      border-bottom: 2px solid #ddd
+    }
+
+    .ubar .i {
+      font-size: 13px;
+      font-weight: 700;
+      color: #004B87
+    }
+
+    .ubar .a {
+      display: flex;
+      gap: 6px
+    }
+
+    .bt {
+      padding: 7px 18px;
+      border: none;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-block
+    }
+
+    .bt-p {
+      background: #004B87;
+      color: #fff
+    }
+
+    .bt-p:disabled {
+      background: #ccc;
+      cursor: default
+    }
+
+    .bt-r {
+      background: #ED1C24;
+      color: #fff
+    }
+
+    .bt-o {
+      background: #fff;
+      color: #004B87;
+      border: 2px solid #004B87
+    }
+
+    .uz {
+      border: 2px dashed #004B87;
+      border-radius: 8px;
+      padding: 36px;
+      text-align: center;
+      background: #fff;
+      cursor: pointer;
+      margin: 20px
+    }
+
+    .cd {
+      background: #fff;
+      border-radius: 6px;
+      padding: 14px;
+      border: 1px solid #ddd;
+      margin: 0 20px 12px
+    }
+
+    .cd h3 {
+      font-size: 12px;
+      font-weight: 700;
+      color: #004B87;
+      margin-bottom: 8px
+    }
+
+    .g3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px
+    }
+
+    .g2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px
+    }
+
+    .g4 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 8px
+    }
+
+    .fl {
+      font-size: 10px;
+      font-weight: 600;
+      color: #666;
+      display: block
+    }
+
+    select,
+    input[type=text] {
+      width: 100%;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-size: 11px;
+      margin-top: 2px
+    }
+
+    select.ok {
+      background: #efffef
+    }
+
+    .st {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10px
+    }
+
+    .st th {
+      padding: 4px 6px;
+      text-align: left;
+      border-bottom: 2px solid #004B87;
+      font-size: 9px
+    }
+
+    .st td {
+      padding: 4px 6px;
+      border-bottom: 1px solid #eee
+    }
+
+    .sa {
+      padding: 16px 20px
+    }
+
+    /* Preset buttons */
+    .presets {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+      flex-wrap: wrap
+    }
+
+    .pre-btn {
+      padding: 6px 14px;
+      border: 2px solid #004B87;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      background: #fff;
+      color: #004B87;
+      transition: all .15s
+    }
+
+    .pre-btn:hover,
+    .pre-btn.active {
+      background: #004B87;
+      color: #fff
+    }
+
+    /* ═══ SLIP ═══ */
+    .slip {
+      display: flex;
+      border: 1.5pt solid #000;
+      background: #fff;
+      margin-bottom: 8px;
+      font-family: 'Times New Roman', Times, serif;
+      color: #000;
+      font-size: 9px;
+      line-height: 1.2
+    }
+
+    .SL {
+      width: 380px;
+      padding: 6px 10px;
+      border-right: 1.5pt dashed #888;
+      position: relative
+    }
+
+    .SR {
+      flex: 1;
+      padding: 6px 10px;
+      position: relative
+    }
+
+    .pf {
+      font-size: 6px;
+      color: #888;
+      margin-bottom: 3px
+    }
+
+    .pf::before {
+      content: '◄ '
+    }
+
+    .hh {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 4px
+    }
+
+    .bn {
+      font-size: 11px;
+      font-weight: bold;
+      font-family: 'Arial Black', Arial, sans-serif
+    }
+
+    .bs {
+      font-size: 5px;
+      color: #555;
+      font-style: italic
+    }
+
+    .tt-m {
+      font-weight: bold;
+      font-size: 9px
+    }
+
+    .tt-s {
+      font-size: 6px
+    }
+
+    .DB {
+      display: inline-flex;
+      margin-top: 1px
+    }
+
+    .DB .c {
+      width: 16px;
+      height: 16px;
+      border: 1pt solid #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: bold;
+      font-family: 'Courier New', monospace
+    }
+
+    .BG {
+      display: flex;
+      margin: 2px 0
+    }
+
+    .BG .b {
+      width: 18px;
+      height: 18px;
+      border: 1pt solid #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: bold;
+      font-family: 'Courier New', monospace
+    }
+
+    .BG .sp {
+      width: 4px
+    }
+
+    .lb {
+      font-size: 7.5px;
+      font-weight: bold;
+      margin-bottom: 0px;
+      margin-top: 2px
+    }
+
+    .nl {
+      border-bottom: 1pt solid #000;
+      min-height: 14px;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 1px 0;
+      margin-bottom: 3px
+    }
+
+    .LT {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1px
+    }
+
+    .LT th,
+    .LT td {
+      border: 1pt solid #000;
+      padding: 1px 3px;
+      vertical-align: top;
+      font-size: 8px
+    }
+
+    .LT th {
+      font-size: 6.5px;
+      font-weight: bold;
+      text-align: left
+    }
+
+    .LT .vv {
+      font-weight: bold;
+      font-size: 13px;
+      font-family: 'Courier New', monospace
+    }
+
+    .RT {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1px
+    }
+
+    .RT th,
+    .RT td {
+      border: 1pt solid #000;
+      padding: 1px 3px;
+      vertical-align: middle;
+      font-size: 8px
+    }
+
+    .RT th {
+      font-size: 6px;
+      font-weight: bold;
+      text-align: left
+    }
+
+    .RT .vv {
+      font-weight: bold;
+      font-size: 13px;
+      font-family: 'Courier New', monospace
+    }
+
+    .aw {
+      margin-top: 2px;
+      font-size: 10px;
+      font-weight: bold
+    }
+
+    .aw b {
+      font-weight: bold
+    }
+
+    .aw .h {
+      font-size: 10px;
+      font-weight: bold;
+      color: #000;
+      border-bottom: 1pt solid #000;
+      min-height: 12px;
+      display: block;
+      margin-top: 0px
+    }
+
+    .sg {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px
+    }
+
+    .sg-b {
+      text-align: center;
+      flex: 1
+    }
+
+    .sg-l {
+      border-top: 1pt solid #000;
+      padding-top: 2px;
+      font-size: 6px
+    }
+
+    .bn2 {
+      font-size: 5px;
+      color: #444;
+      margin-top: 3px
+    }
+
+    .pn {
+      font-size: 5px;
+      color: #333;
+      margin-top: 2px;
+      text-align: right
+    }
+
+    .sr {
+      font-size: 5px;
+      color: #888;
+      margin-top: 4px
+    }
+
+    @media print {
+      .np {
+        display: none !important
+      }
+
+      .sa {
+        padding: 0
+      }
+
+      body {
+        background: #fff;
+        padding: 4px;
+        margin: 0
+      }
+
+      .slip {
+        page-break-inside: avoid;
+        margin-bottom: 6px
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="hdr np"><h1>HDFC Bank — Deposit Slip Generator</h1><p>Upload Excel → Enter Company Details → Print</p></div>
-<div id="app"></div>
+  <div class="hdr np">
+    <h1>HDFC Bank — Deposit Slip Generator</h1>
+    <p>Upload Excel → Enter Company Details → Print</p>
+  </div>
+  <div id="app"></div>
 
-<script>
-/* ══ STATE ══ */
-var F={name:'',acct:'',pan:'',con:''};
-var S={step:1,rows:null,hd:[],cm:{}};
+  <script>
+    /* ══ STATE ══ */
+    var F = { name: '', acct: '', pan: '', con: '' };
+    var S = { step: 1, rows: null, hd: [], cm: {} };
 
-/* ══ HELPERS ══ */
-function ntw(n){if(!n)return'';var o=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];var t=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];function c(n){if(n<20)return o[n];if(n<100)return t[n/10|0]+(n%10?' '+o[n%10]:'');if(n<1000)return o[n/100|0]+' Hundred'+(n%100?' '+c(n%100):'');if(n<100000)return c(n/1000|0)+' Thousand'+(n%1000?' '+c(n%1000):'');if(n<10000000)return c(n/100000|0)+' Lakh'+(n%100000?' '+c(n%100000):'');return c(n/10000000|0)+' Crore'+(n%10000000?' '+c(n%10000000):'');}var i=Math.floor(n),d=Math.round((n-i)*100);var r=c(i);if(d>0)r+=' and '+c(d)+' Paise';return r;}
-function fmt(n){if(!n)return'';var s=String(Math.floor(n)),l=s.slice(-3),r=s.slice(0,-3);if(r)r=r.replace(/\B(?=(\d{2})+(?!\d))/g,',');return(r?r+',':'')+l;}
-function fmtF(n){if(!n)return'0.00';var d=Math.round((n-Math.floor(n))*100);return fmt(n)+'.'+String(d).padStart(2,'0');}
-function pdt(d){if(!d)return['','','','','','','',''];var s=String(d),m=s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);if(m){var a=m[1].padStart(2,'0'),b=m[2].padStart(2,'0'),y=m[3];return[a[0],a[1],b[0],b[1],y[0],y[1],y[2],y[3]];}if(/^\d{5}$/.test(s)){var x=new Date((parseInt(s)-25569)*86400000);return[...(''+(x.getDate())).padStart(2,'0'),...(''+(x.getMonth()+1)).padStart(2,'0'),...(''+x.getFullYear())];}return['','','','','','','',''];}
+    /* ══ HELPERS ══ */
+    function ntw(n) { if (!n) return ''; var o = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen']; var t = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety']; function c(n) { if (n < 20) return o[n]; if (n < 100) return t[n / 10 | 0] + (n % 10 ? ' ' + o[n % 10] : ''); if (n < 1000) return o[n / 100 | 0] + ' Hundred' + (n % 100 ? ' ' + c(n % 100) : ''); if (n < 100000) return c(n / 1000 | 0) + ' Thousand' + (n % 1000 ? ' ' + c(n % 1000) : ''); if (n < 10000000) return c(n / 100000 | 0) + ' Lakh' + (n % 100000 ? ' ' + c(n % 100000) : ''); return c(n / 10000000 | 0) + ' Crore' + (n % 10000000 ? ' ' + c(n % 10000000) : ''); } var i = Math.floor(n), d = Math.round((n - i) * 100); var r = c(i); if (d > 0) r += ' and ' + c(d) + ' Paise'; return r; }
+    function fmt(n) { if (!n) return ''; var s = String(Math.floor(n)), l = s.slice(-3), r = s.slice(0, -3); if (r) r = r.replace(/\B(?=(\d{2})+(?!\d))/g, ','); return (r ? r + ',' : '') + l; }
+    function fmtF(n) { if (!n) return '0.00'; var d = Math.round((n - Math.floor(n)) * 100); return fmt(n) + '.' + String(d).padStart(2, '0'); }
+    function pdt(d) { if (!d) return ['', '', '', '', '', '', '', '']; var s = String(d), m = s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/); if (m) { var a = m[1].padStart(2, '0'), b = m[2].padStart(2, '0'), y = m[3]; return [a[0], a[1], b[0], b[1], y[0], y[1], y[2], y[3]]; } if (/^\d{5}$/.test(s)) { var x = new Date((parseInt(s) - 25569) * 86400000); return [...('' + (x.getDate())).padStart(2, '0'), ...('' + (x.getMonth() + 1)).padStart(2, '0'), ...('' + x.getFullYear())]; } return ['', '', '', '', '', '', '', '']; }
 
-function dateBoxes(v){var h='<div class="DB">';var vi=[v[0],v[1],-1,v[2],v[3],-1,v[4],v[5],v[6],v[7]];for(var i=0;i<10;i++){if(vi[i]===-1){h+='<div style="width:4px"></div>';continue;}h+='<div class="c">'+(vi[i]||'')+'</div>';}return h+'</div>';}
-function acctBoxes(val,count){var chars=val.split('');var h='<div class="BG">';for(var i=0;i<count;i++){if(i>0&&i%4===0)h+='<div class="sp"></div>';h+='<div class="b">'+(chars[i]||'')+'</div>';}return h+'</div>';}
-function ccBoxes(count){var h='<div class="BG">';for(var i=0;i<count;i++){if(i>0&&i%4===0)h+='<div class="sp"></div>';h+='<div class="b"></div>';}return h+'</div>';}
-function panBoxes(val,count){var chars=val.split('');var h='<div class="BG">';for(var i=0;i<count;i++){h+='<div class="b">'+(chars[i]||'')+'</div>';}return h+'</div>';}
-function contactBoxes(val){var chars=val.split('');var h='<div class="BG">';for(var i=0;i<10;i++){h+='<div class="b">'+(chars[i]||'')+'</div>';}return h+'</div>';}
+    function dateBoxes(v) { var h = '<div class="DB">'; var vi = [v[0], v[1], -1, v[2], v[3], -1, v[4], v[5], v[6], v[7]]; for (var i = 0; i < 10; i++) { if (vi[i] === -1) { h += '<div style="width:4px"></div>'; continue; } h += '<div class="c">' + (vi[i] || '') + '</div>'; } return h + '</div>'; }
+    function acctBoxes(val, count) { var chars = val.split(''); var h = '<div class="BG">'; for (var i = 0; i < count; i++) { if (i > 0 && i % 4 === 0) h += '<div class="sp"></div>'; h += '<div class="b">' + (chars[i] || '') + '</div>'; } return h + '</div>'; }
+    function ccBoxes(count) { var h = '<div class="BG">'; for (var i = 0; i < count; i++) { if (i > 0 && i % 4 === 0) h += '<div class="sp"></div>'; h += '<div class="b"></div>'; } return h + '</div>'; }
+    function panBoxes(val, count) { var chars = val.split(''); var h = '<div class="BG">'; for (var i = 0; i < count; i++) { h += '<div class="b">' + (chars[i] || '') + '</div>'; } return h + '</div>'; }
+    function contactBoxes(val) { var chars = val.split(''); var h = '<div class="BG">'; for (var i = 0; i < 10; i++) { h += '<div class="b">' + (chars[i] || '') + '</div>'; } return h + '</div>'; }
 
-function amap(hd){var m={},c={partyName:['Party Name','Name','name'],amount:['Amount','amount','Amt'],chequeNo:['Ch.No.','Cheque No','Cheque No.','Ch No','ch.no.','ChNo'],date:['Date','date'],place:['Place','place','City','city']};for(var k in c){for(var i=0;i<c[k].length;i++){var cn=c[k][i];var f=hd.find(function(h){return h.trim().toLowerCase()===cn.toLowerCase();});if(f){m[k]=f;break;}}}return m;}
-function gm(){if(!S.rows)return[];return S.rows.map(function(r){var ra=S.cm.amount?r[S.cm.amount]:0;var a=typeof ra==='string'?parseFloat(ra.replace(/,/g,''))||0:ra||0;return{p:S.cm.partyName?String(r[S.cm.partyName]):'',a:a,c:S.cm.chequeNo?String(r[S.cm.chequeNo]):'',d:S.cm.date?String(r[S.cm.date]):'',pl:S.cm.place?String(r[S.cm.place]):'',};});}
+    function amap(hd) { var m = {}, c = { partyName: ['Party Name', 'Name', 'name'], amount: ['Amount', 'amount', 'Amt'], chequeNo: ['Ch.No.', 'Cheque No', 'Cheque No.', 'Ch No', 'ch.no.', 'ChNo'], date: ['Date', 'date'], place: ['Place', 'place', 'City', 'city'], bankBranch: ['Bank & Branch', 'Bank', 'Bank Branch', 'Drawn On', 'Bank Name', 'bank'] }; for (var k in c) { for (var i = 0; i < c[k].length; i++) { var cn = c[k][i]; var f = hd.find(function (h) { return h.trim().toLowerCase() === cn.toLowerCase(); }); if (f) { m[k] = f; break; } } } return m; }
+    function gm() { if (!S.rows) return []; return S.rows.map(function (r) { var ra = S.cm.amount ? r[S.cm.amount] : 0; var a = typeof ra === 'string' ? parseFloat(ra.replace(/,/g, '')) || 0 : ra || 0; return { p: S.cm.partyName ? String(r[S.cm.partyName]) : '', a: a, c: S.cm.chequeNo ? String(r[S.cm.chequeNo]) : '', d: S.cm.date ? String(r[S.cm.date]) : '', pl: S.cm.place ? String(r[S.cm.place]) : '', bb: S.cm.bankBranch ? String(r[S.cm.bankBranch]) : '', }; }); }
 
-/* ══ RENDER ══ */
-function render(){
-  var el=document.getElementById('app');
-  if(S.step===1)el.innerHTML=r1();
-  else if(S.step===2)el.innerHTML=r2();
-  else el.innerHTML=r3();
-  bindEv();
-}
+    /* ══ RENDER ══ */
+    function render() {
+      var el = document.getElementById('app');
+      if (S.step === 1) el.innerHTML = r1();
+      else if (S.step === 2) el.innerHTML = r2();
+      else el.innerHTML = r3();
+      bindEv();
+    }
 
-function r1(){return'<div class="uz np" id="uz"><div style="font-size:40px;margin-bottom:6px">📄</div><div style="font-size:15px;font-weight:600;color:#004B87">Click to upload your Excel file</div><div style="font-size:11px;color:#999;margin-top:4px">.xlsx / .xls / .csv</div><input type="file" id="fi" accept=".xlsx,.xls,.csv" style="display:none"></div>';}
+    function r1() { return '<div class="uz np" id="uz"><div style="font-size:40px;margin-bottom:6px">📄</div><div style="font-size:15px;font-weight:600;color:#004B87">Click to upload your Excel file</div><div style="font-size:11px;color:#999;margin-top:4px">.xlsx / .xls / .csv</div><input type="file" id="fi" accept=".xlsx,.xls,.csv" style="display:none"></div>'; }
 
-function r2(){
-  var fs=[{k:'partyName',l:'Party Name *'},{k:'amount',l:'Amount *'},{k:'chequeNo',l:'Cheque No *'},{k:'date',l:'Date'},{k:'place',l:'Place / City'}];
-  var fh=fs.map(function(f){var sv=S.cm[f.k]||'';var opts='<option value="">— Select —</option>'+S.hd.map(function(h){return'<option value="'+h+'"'+(h===sv?' selected':'')+'>'+h+'</option>';}).join('');return'<div><label class="fl">'+f.l+'</label><select data-c="'+f.k+'" class="'+(sv?'ok':'')+'">'+opts+'</select></div>';}).join('');
-  var ok=S.cm.partyName&&S.cm.amount&&S.cm.chequeNo&&F.name&&F.acct;
+    function r2() {
+      var fs = [{ k: 'partyName', l: 'Party Name *' }, { k: 'amount', l: 'Amount *' }, { k: 'chequeNo', l: 'Cheque No *' }, { k: 'date', l: 'Date' }, { k: 'place', l: 'Place / City' }, { k: 'bankBranch', l: 'Bank & Branch' }];
+      var fh = fs.map(function (f) { var sv = S.cm[f.k] || ''; var opts = '<option value="">— Select —</option>' + S.hd.map(function (h) { return '<option value="' + h + '"' + (h === sv ? ' selected' : '') + '>' + h + '</option>'; }).join(''); return '<div><label class="fl">' + f.l + '</label><select data-c="' + f.k + '" class="' + (sv ? 'ok' : '') + '">' + opts + '</select></div>'; }).join('');
+      var ok = S.cm.partyName && S.cm.amount && S.cm.chequeNo && F.name && F.acct;
 
-  return'<div class="cd np"><h3>1. Map Excel Columns</h3><div class="g3">'+fh+'</div><div style="font-size:9px;color:#999;margin-top:6px">✓ '+(S.rows?S.rows.length:0)+' rows loaded</div></div>'
+      return '<div class="cd np"><h3>1. Map Excel Columns</h3><div class="g3">' + fh + '</div><div style="font-size:9px;color:#999;margin-top:6px">✓ ' + (S.rows ? S.rows.length : 0) + ' rows loaded</div></div>'
 
-    +'<div class="cd np">'
-      +'<h3>2. Company Details <span style="font-size:9px;font-weight:400;color:#666">(appears on every slip)</span></h3>'
-      +'<div class="presets" id="presets">'
-        +'<span style="font-size:10px;color:#888;padding:6px 0">Quick fill:</span>'
-        +'<div class="pre-btn" data-pre="0">Company 1</div>'
-        +'<div class="pre-btn" data-pre="1">Company 2</div>'
-        +'<div class="pre-btn" data-pre="2">Company 3</div>'
-        +'<div class="pre-btn" data-pre="clear" style="border-color:#aaa;color:#aaa">Clear</div>'
-      +'</div>'
-      +'<div class="g2">'
-        +'<div><label class="fl">Company / Account Holder Name *</label><input type="text" id="f_name" value="'+esc(F.name)+'" placeholder="e.g. VECTOR BIOTEK PVT LTD"></div>'
-        +'<div><label class="fl">Account Number *</label><input type="text" id="f_acct" value="'+esc(F.acct)+'" placeholder="e.g. 01352560000387"></div>'
-        +'<div><label class="fl">PAN No.</label><input type="text" id="f_pan" value="'+esc(F.pan)+'" placeholder="e.g. AABCV5803G"></div>'
-        +'<div><label class="fl">Contact No.</label><input type="text" id="f_con" value="'+esc(F.con)+'" placeholder="e.g. 9427112837"></div>'
-      +'</div>'
-      +'<div style="font-size:8px;color:#999;margin-top:8px">💡 Tip: Edit the preset buttons in the code to save your 3 company profiles permanently</div>'
-    +'</div>'
+        + '<div class="cd np">'
+        + '<h3>2. Company Details <span style="font-size:9px;font-weight:400;color:#666">(appears on every slip)</span></h3>'
+        + '<div class="presets" id="presets">'
+        + '<span style="font-size:10px;color:#888;padding:6px 0">Quick fill:</span>'
+        + '<div class="pre-btn" data-pre="0">Company 1</div>'
+        + '<div class="pre-btn" data-pre="1">Company 2</div>'
+        + '<div class="pre-btn" data-pre="2">Company 3</div>'
+        + '<div class="pre-btn" data-pre="clear" style="border-color:#aaa;color:#aaa">Clear</div>'
+        + '</div>'
+        + '<div class="g2">'
+        + '<div><label class="fl">Company / Account Holder Name *</label><input type="text" id="f_name" value="' + esc(F.name) + '" placeholder="e.g. VECTOR BIOTEK PVT LTD"></div>'
+        + '<div><label class="fl">Account Number *</label><input type="text" id="f_acct" value="' + esc(F.acct) + '" placeholder="e.g. 01352560000387"></div>'
+        + '<div><label class="fl">PAN No.</label><input type="text" id="f_pan" value="' + esc(F.pan) + '" placeholder="e.g. AABCV5803G"></div>'
+        + '<div><label class="fl">Contact No.</label><input type="text" id="f_con" value="' + esc(F.con) + '" placeholder="e.g. 9427112837"></div>'
+        + '</div>'
+        + '<div style="font-size:8px;color:#999;margin-top:8px">💡 Tip: Edit the preset buttons in the code to save your 3 company profiles permanently</div>'
+        + '</div>'
 
-    +'<div style="padding:0 20px"><button class="bt bt-p" id="gB" '+(ok?'':'disabled')+'>Generate Slips →</button></div>';
-}
+        + '<div style="padding:0 20px"><button class="bt bt-p" id="gB" ' + (ok ? '' : 'disabled') + '>Generate Slips →</button></div>';
+    }
 
-function esc(s){return(s||'').replace(/"/g,'&quot;');}
+    function esc(s) { return (s || '').replace(/"/g, '&quot;'); }
 
-function r3(){
-  var md=gm(),tot=md.reduce(function(s,r){return s+r.a;},0);
-  var sr=md.map(function(r,i){return'<tr><td>'+(i+1)+'</td><td style="font-weight:600">'+r.p+'</td><td style="text-align:right;font-family:monospace">₹'+fmt(r.a)+'</td><td style="font-family:monospace">'+r.c+'</td><td>'+r.pl+'</td></tr>';}).join('');
-  return'<div class="ubar np"><div class="i">'+md.length+' Slips — ₹'+fmt(tot)+' — '+F.name+'</div><div class="a"><button class="bt bt-o" id="eB">← Edit</button><button class="bt bt-r" id="pB">🖨️ Print All</button></div></div>'
-    +'<div class="cd np" style="overflow-x:auto"><table class="st"><thead><tr><th>#</th><th>Party Name</th><th style="text-align:right">Amount</th><th>Ch.No.</th><th>City</th></tr></thead><tbody>'+sr+'</tbody></table></div>'
-    +'<div class="sa">'+md.map(function(r,i){return mkSlip(r,i);}).join('')+'</div>';
-}
+    function r3() {
+      var md = gm(), tot = md.reduce(function (s, r) { return s + r.a; }, 0);
+      var sr = md.map(function (r, i) { return '<tr><td>' + (i + 1) + '</td><td style="font-weight:600">' + r.p + '</td><td style="text-align:right;font-family:monospace">₹' + fmt(r.a) + '</td><td style="font-family:monospace">' + r.c + '</td><td>' + r.bb + '</td><td>' + r.pl + '</td></tr>'; }).join('');
+      return '<div class="ubar np"><div class="i">' + md.length + ' Slips — ₹' + fmt(tot) + ' — ' + F.name + '</div><div class="a"><button class="bt bt-o" id="eB">← Edit</button><button class="bt bt-r" id="pB">🖨️ Print All</button></div></div>'
+        + '<div class="cd np" style="overflow-x:auto"><table class="st"><thead><tr><th>#</th><th>Party Name</th><th style="text-align:right">Amount</th><th>Ch.No.</th><th>Bank & Branch</th><th>City</th></tr></thead><tbody>' + sr + '</tbody></table></div>'
+        + '<div class="sa">' + md.map(function (r, i) { return mkSlip(r, i); }).join('') + '</div>';
+    }
 
-/* ═══════ SLIP ═══════ */
-function mkSlip(row,idx){
-  var dt=pdt(row.d),db=dateBoxes(dt),chk=row.c,af=fmtF(row.a),aw=ntw(row.a).toUpperCase()+' ONLY',party=row.p,city=row.pl;
-  var ds=dt[0]+dt[1]+'/'+dt[2]+dt[3]+'/'+dt[4]+dt[5]+dt[6]+dt[7];
-  var acctB=acctBoxes(F.acct,14),ccB=ccBoxes(16),panB=panBoxes(F.pan,10),conB=contactBoxes(F.con);
+    /* ═══════ SLIP ═══════ */
+    function mkSlip(row, idx) {
+      var dt = pdt(row.d), db = dateBoxes(dt), chk = row.c, af = fmtF(row.a), aw = ntw(row.a).toUpperCase() + ' ONLY', party = row.p, city = row.pl, bankBr = row.bb;
+      var ds = dt[0] + dt[1] + '/' + dt[2] + dt[3] + '/' + dt[4] + dt[5] + dt[6] + dt[7];
+      var acctB = acctBoxes(F.acct, 14), ccB = ccBoxes(16), panB = panBoxes(F.pan, 10), conB = contactBoxes(F.con);
 
-  var er='';for(var i=0;i<5;i++)er+='<tr><td style="border:1pt solid #000;height:18px"></td><td style="border:1pt solid #000"></td><td style="border:1pt solid #000"></td></tr>';
+      var er = ''; for (var i = 0; i < 5; i++)er += '<tr><td style="border:1pt solid #000;height:14px"></td><td style="border:1pt solid #000"></td><td style="border:1pt solid #000"></td></tr>';
 
-  var dens=['1000x','500x','100x','50x','20x','10x','Others'];
-  var bankRows='<tr><td class="vv" style="font-size:8px">'+party+'</td><td class="vv" style="text-align:center;font-size:9px">'+city+'</td><td class="vv" style="text-align:center">'+chk+'</td><td style="text-align:right;font-weight:bold;font-size:8px">'+dens[0]+'</td><td style="text-align:right"></td></tr>';
-  for(var i=1;i<7;i++){bankRows+='<tr><td style="border:1pt solid #000;height:18px">'+(i===1?ds:'')+'</td><td style="border:1pt solid #000"></td><td style="border:1pt solid #000"></td><td style="border:1pt solid #000;text-align:right;font-weight:bold;font-size:8px">'+dens[i]+'</td><td style="border:1pt solid #000;text-align:right"></td></tr>';}
+      var dens = ['1000x', '500x', '100x', '50x', '20x', '10x', 'Others'];
+      var bankRows = '<tr><td class="vv" style="font-size:13.5px">' + bankBr + '</td><td class="vv" style="text-align:center;font-size:13.5px">' + city + '</td><td class="vv" style="text-align:center">' + chk + '</td><td style="text-align:right;font-weight:bold;font-size:7px">' + dens[0] + '</td><td style="text-align:right"></td></tr>';
+      bankRows += '<tr><td style="border:1pt solid #000;font-size:13.5px;font-weight:bold">' + party + '</td><td style="border:1pt solid #000"></td><td style="border:1pt solid #000;font-size:7px"></td><td style="border:1pt solid #000;text-align:right;font-weight:bold;font-size:7px">' + dens[1] + '</td><td style="border:1pt solid #000;text-align:right"></td></tr>';
+      for (var i = 2; i < 7; i++) { bankRows += '<tr><td style="border:1pt solid #000;height:14px"></td><td style="border:1pt solid #000"></td><td style="border:1pt solid #000"></td><td style="border:1pt solid #000;text-align:right;font-weight:bold;font-size:7px">' + dens[i] + '</td><td style="border:1pt solid #000;text-align:right"></td></tr>'; }
 
-  return '<div class="slip">'
+      return '<div class="slip">'
 
-  +'<div class="SL">'
-    +'<div class="pf">Perforation Mark</div>'
-    +'<div class="hh">'
-      +'<div><div class="bn">▪ HDFC BANK</div><div class="bs">We understand your world</div></div>'
-      +'<div style="text-align:right"><div class="tt-m">Deposit Slip/जमा पर्ची</div><div class="tt-s">(Customer Copy/ग्राहक प्रति)</div></div>'
-      +'<div style="text-align:right"><div class="lb" style="font-size:7px">Date /तारीख</div>'+db+'</div>'
-    +'</div>'
-    +'<div class="lb">Account Number/खाता संख्या</div>'+acctB
-    +'<div class="lb">Credit Card Number/क्रेडिट कार्ड संख्या*</div>'+ccB
-    +'<div class="lb" style="margin-top:6px">Name/नाम :</div><div class="nl">'+F.name+'</div>'
-    +'<table class="LT"><thead><tr><th style="width:46%">Cash/Cheque Details /रोकड़ /चेकों का विवरण</th><th style="width:22%">Cheque No./चेक नं.</th><th>Rupees/रुपये</th></tr></thead><tbody>'
-      +'<tr><td></td><td style="text-align:center" class="vv">'+chk+'</td><td style="text-align:right" class="vv">'+af+'</td></tr>'
-      +'<tr><td style="border:1pt solid #000;font-size:8px">'+party+'<br>'+city+'</td><td style="border:1pt solid #000;font-size:8px">'+ds+'</td><td style="border:1pt solid #000"></td></tr>'
-      +er
-      +'<tr><td style="border:1pt solid #000"></td><td style="border:1pt solid #000;text-align:right;font-size:7.5px;font-weight:bold">Total Rs./कुल राशि</td><td style="border:1pt solid #000;text-align:right" class="vv">'+af+'</td></tr>'
-    +'</tbody></table>'
-    +'<div class="aw"><b>Rupees(In Words):</b><span class="h"> '+aw+'</span></div>'
-    +'<div style="font-size:7px;color:#444;border-bottom:1pt solid #000;min-height:10px;margin-bottom:2px">रुपये (शब्दों में) :</div>'
-    +'<div class="sg"><div class="sg-b"><div class="sg-l">Depositor\'s Signature/जमाकर्ता के हस्ताक्षर</div></div><div class="sg-b"><div class="sg-l">Teller\'s Signature/टेलर के हस्ताक्षर</div></div></div>'
-    +'<div class="sr">Jan.19_2610 SlipBook SIZE 9.6"x3.6" INCHES HINDI - F</div>'
-  +'</div>'
+        + '<div class="SL">'
+        + '<div class="pf">Perforation Mark</div>'
+        + '<div class="hh">'
+        + '<div><div class="bn">▪ HDFC BANK</div><div class="bs">We understand your world</div></div>'
+        + '<div style="text-align:right"><div class="tt-m">Deposit Slip/जमा पर्ची</div><div class="tt-s">(Customer Copy/ग्राहक प्रति)</div></div>'
+        + '<div style="text-align:right"><div class="lb" style="font-size:7px">Date /तारीख</div>' + db + '</div>'
+        + '</div>'
+        + '<div class="lb">Account Number/खाता संख्या</div>' + acctB
+        + '<div class="lb">Credit Card Number/क्रेडिट कार्ड संख्या*</div>' + ccB
+        + '<div class="lb" style="margin-top:3px">Name/नाम :</div><div class="nl">' + F.name + '</div>'
+        + '<table class="LT"><thead><tr><th style="width:46%">Cash/Cheque Details /रोकड़ /चेकों का विवरण</th><th style="width:22%">Cheque No./चेक नं.</th><th>Rupees/रुपये</th></tr></thead><tbody>'
+        + '<tr><td style="font-size:13.5px;font-weight:bold">' + bankBr + '</td><td style="text-align:center" class="vv">' + chk + '</td><td style="text-align:right" class="vv">' + af + '</td></tr>'
+        + '<tr><td style="border:1pt solid #000;font-size:13.5px;font-weight:bold">' + party + '<br>' + city + '</td><td style="border:1pt solid #000;font-size:8px"></td><td style="border:1pt solid #000"></td></tr>'
+        + er
+        + '<tr><td style="border:1pt solid #000"></td><td style="border:1pt solid #000;text-align:right;font-size:7.5px;font-weight:bold">Total Rs./कुल राशि</td><td style="border:1pt solid #000;text-align:right" class="vv">' + af + '</td></tr>'
+        + '</tbody></table>'
+        + '<div class="aw"><b>Rupees(In Words):</b><span class="h"> ' + aw + '</span></div>'
+        + '<div style="font-size:6px;color:#444;border-bottom:1pt solid #000;min-height:8px;margin-bottom:1px">रुपये (शब्दों में) :</div>'
+        + '<div class="sg"><div class="sg-b"><div class="sg-l">Depositor\'s Signature/जमाकर्ता के हस्ताक्षर</div></div><div class="sg-b"><div class="sg-l">Teller\'s Signature/टेलर के हस्ताक्षर</div></div></div>'
+        + '<div class="sr">Jan.19_2610 SlipBook SIZE 9.6"x3.6" INCHES HINDI - F</div>'
+        + '</div>'
 
-  +'<div class="SR">'
-    +'<div class="pf">Perforation Mark</div>'
-    +'<div class="hh">'
-      +'<div><div class="bn">▪ HDFC BANK</div><div class="bs">We understand your world</div></div>'
-      +'<div style="flex:1;padding:0 8px;font-size:7px;line-height:1.5"><div>☐ Cash/नकद</div><div>☐ Local Cheque/स्थानीय चेक</div><div>☐ Outstaion Cheque/बाह्य चेक</div><div>☐ Credit Card Payment/क्रेडिट कार्ड भुगतान</div></div>'
-      +'<div style="padding:0 4px;font-size:6.5px;line-height:1.4"><div>•For NRO Account/ एन आर ओ खाते के लिए</div><div>☐ Dividend / Interest Warrant/डिविडेंड</div><div>&nbsp;&nbsp;(लाभांश)/ब्याज वारंट लाभांश</div><div>☐ Rent/Pension/Sale Proceeds of Assets/</div><div>&nbsp;&nbsp;किराया/पेंशन/संपत्तियों की बिक्री से आय</div></div>'
-      +'<div style="text-align:right"><div class="tt-m">Deposit Slip/जमा पर्ची</div><div class="tt-s">(Bank Copy/ग्राहक प्रति)</div><div class="lb" style="font-size:7px;margin-top:2px">Date /तारीख</div>'+db+'</div>'
-    +'</div>'
+        + '<div class="SR">'
+        + '<div class="pf">Perforation Mark</div>'
+        + '<div class="hh">'
+        + '<div><div class="bn">▪ HDFC BANK</div><div class="bs">We understand your world</div></div>'
+        + '<div style="flex:1;padding:0 8px;font-size:7px;line-height:1.5"><div>☐ Cash/नकद</div><div>☐ Local Cheque/स्थानीय चेक</div><div>☐ Outstaion Cheque/बाह्य चेक</div><div>☐ Credit Card Payment/क्रेडिट कार्ड भुगतान</div></div>'
+        + '<div style="padding:0 4px;font-size:6.5px;line-height:1.4"><div>•For NRO Account/ एन आर ओ खाते के लिए</div><div>☐ Dividend / Interest Warrant/डिविडेंड</div><div>&nbsp;&nbsp;(लाभांश)/ब्याज वारंट लाभांश</div><div>☐ Rent/Pension/Sale Proceeds of Assets/</div><div>&nbsp;&nbsp;किराया/पेंशन/संपत्तियों की बिक्री से आय</div></div>'
+        + '<div style="text-align:right"><div class="tt-m">Deposit Slip/जमा पर्ची</div><div class="tt-s">(Bank Copy/ग्राहक प्रति)</div><div class="lb" style="font-size:7px;margin-top:2px">Date /तारीख</div>' + db + '</div>'
+        + '</div>'
 
-    +'<div style="display:flex;gap:12px;margin-bottom:2px"><div style="flex:1"><div class="lb">Contact No./संपर्क नं.:</div>'+conB+'</div><div style="flex:1"><div class="lb">Account Number/खाता संख्या</div>'+acctB+'</div></div>'
-    +'<div style="display:flex;gap:12px;margin-bottom:2px"><div style="flex:1"><div class="lb">PAN No.*/पैन नं.*</div>'+panB+'</div><div style="flex:1"><div class="lb">Credit Card Number/क्रेडिट कार्ड संख्या*</div>'+ccB+'</div></div>'
+        + '<div style="display:flex;gap:12px;margin-bottom:2px"><div style="flex:1"><div class="lb">Contact No./संपर्क नं.:</div>' + conB + '</div><div style="flex:1"><div class="lb">Account Number/खाता संख्या</div>' + acctB + '</div></div>'
+        + '<div style="display:flex;gap:12px;margin-bottom:2px"><div style="flex:1"><div class="lb">PAN No.*/पैन नं.*</div>' + panB + '</div><div style="flex:1"><div class="lb">Credit Card Number/क्रेडिट कार्ड संख्या*</div>' + ccB + '</div></div>'
 
-    +'<div class="lb" style="margin-top:4px">Name/नाम :</div><div class="nl">'+F.name+'</div>'
+        + '<div class="lb" style="margin-top:2px">Name/नाम :</div><div class="nl">' + F.name + '</div>'
 
-    +'<div style="display:flex;position:relative">'
-      +'<div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:bold;padding:0 3px;display:flex;align-items:center">Cheque Details चेक का विवरण</div>'
-      +'<table class="RT" style="flex:1"><thead><tr><th style="width:30%">Bank &amp; Branch/बैंक एवं शाखा</th><th style="width:14%">City/शहर</th><th style="width:16%">Cheque No./चेक नं.</th><th style="width:18%">Denomination/मूल्य वर्ग</th><th>Rupess /रुपये</th></tr></thead><tbody>'+bankRows+'</tbody></table>'
-      +'<div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:bold;padding:0 3px;display:flex;align-items:center">Cash Details /नकद विवरण</div>'
-    +'</div>'
+        + '<div style="display:flex;position:relative">'
+        + '<div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:bold;padding:0 3px;display:flex;align-items:center">Cheque Details चेक का विवरण</div>'
+        + '<table class="RT" style="flex:1"><thead><tr><th style="width:30%">Bank &amp; Branch/बैंक एवं शाखा</th><th style="width:14%">City/शहर</th><th style="width:16%">Cheque No./चेक नं.</th><th style="width:18%">Denomination/मूल्य वर्ग</th><th>Rupess /रुपये</th></tr></thead><tbody>' + bankRows + '</tbody></table>'
+        + '<div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:bold;padding:0 3px;display:flex;align-items:center">Cash Details /नकद विवरण</div>'
+        + '</div>'
 
-    +'<div style="display:flex;gap:0;margin-top:2px"><div style="flex:1"><div class="aw"><b>Rupees(In Words):</b><span class="h"> '+aw+'</span></div><div style="font-size:7px;color:#444;border-bottom:1pt solid #000;min-height:10px">रुपये (शब्दों में) :</div></div><div style="width:165px;text-align:right"><div style="border:1pt solid #000;padding:2px 4px;font-size:8px;font-weight:bold;text-align:center">Total Rupees<br>कुल राशि</div><div style="border:1pt solid #000;border-top:none;padding:3px 6px;font-size:12px;font-weight:bold;text-align:right;font-family:monospace">'+af+'</div></div></div>'
+        + '<div style="display:flex;gap:0;margin-top:1px"><div style="flex:1"><div class="aw"><b>Rupees(In Words):</b><span class="h"> ' + aw + '</span></div><div style="font-size:6px;color:#444;border-bottom:1pt solid #000;min-height:8px">रुपये (शब्दों में) :</div></div><div style="width:155px;text-align:right"><div style="border:1pt solid #000;padding:1px 3px;font-size:7px;font-weight:bold;text-align:center">Total Rupees<br>कुल राशि</div><div style="border:1pt solid #000;border-top:none;padding:2px 4px;font-size:13px;font-weight:bold;text-align:right;font-family:monospace">' + af + '</div></div></div>'
 
-    +'<div class="pn">*For Cash Deposits greater Than Rs.49,999/- mention PAN No.<br>*रु. 49,999/- से अधिक नकद जमा करने के लिए पैन नं. का उल्लेख करें</div>'
-    +'<div class="sg"><div class="sg-b"><div class="sg-l">Depositor\'s Signature/जमाकर्ता के हस्ताक्षर</div></div><div class="sg-b"><div class="sg-l">Teller\'s Signature/टेलर के हस्ताक्षर</div></div></div>'
-  +'</div>'
-  +'</div>';
-}
+        + '<div class="pn">*For Cash Deposits greater Than Rs.49,999/- mention PAN No.<br>*रु. 49,999/- से अधिक नकद जमा करने के लिए पैन नं. का उल्लेख करें</div>'
+        + '<div class="sg"><div class="sg-b"><div class="sg-l">Depositor\'s Signature/जमाकर्ता के हस्ताक्षर</div></div><div class="sg-b"><div class="sg-l">Teller\'s Signature/टेलर के हस्ताक्षर</div></div></div>'
+        + '</div>'
+        + '</div>';
+    }
 
-/* ═══════════════════════════════════════════
-   PRESETS — Edit these with your 3 companies
-   ═══════════════════════════════════════════ */
-var PRESETS = [
-  { name:'VECTOR BIOTEK PVT LTD', acct:'01352560000387', pan:'AABCV5803G', con:'9427112837' },
-  { name:'COMPANY TWO NAME',      acct:'',               pan:'',           con:''           },
-  { name:'COMPANY THREE NAME',    acct:'',               pan:'',           con:''           },
-];
+    /* ═══════════════════════════════════════════
+       PRESETS — Edit these with your 3 companies
+       ═══════════════════════════════════════════ */
+    var PRESETS = [
+      { name: 'VECTOR BIOTEK PVT LTD', acct: '01352560000387', pan: 'AABCV5803G', con: '9427112837' },
+      { name: 'COMPANY TWO NAME', acct: '', pan: '', con: '' },
+      { name: 'COMPANY THREE NAME', acct: '', pan: '', con: '' },
+    ];
 
-/* ══ EVENTS ══ */
-function bindEv(){
-  var uz=document.getElementById('uz'),fi=document.getElementById('fi');
-  if(uz){uz.onclick=function(){fi.click();};fi.onchange=hf;}
-  document.querySelectorAll('select[data-c]').forEach(function(s){s.onchange=function(){S.cm[s.dataset.c]=s.value;render();};});
+    /* ══ EVENTS ══ */
+    function bindEv() {
+      var uz = document.getElementById('uz'), fi = document.getElementById('fi');
+      if (uz) { uz.onclick = function () { fi.click(); }; fi.onchange = hf; }
+      document.querySelectorAll('select[data-c]').forEach(function (s) { s.onchange = function () { S.cm[s.dataset.c] = s.value; render(); }; });
 
-  /* Company detail inputs */
-  var fn=document.getElementById('f_name'),fa=document.getElementById('f_acct'),fp=document.getElementById('f_pan'),fc=document.getElementById('f_con');
-  if(fn){fn.oninput=function(){F.name=fn.value;updateGenBtn();};}
-  if(fa){fa.oninput=function(){F.acct=fa.value;updateGenBtn();};}
-  if(fp){fp.oninput=function(){F.pan=fp.value;};}
-  if(fc){fc.oninput=function(){F.con=fc.value;};}
+      /* Company detail inputs */
+      var fn = document.getElementById('f_name'), fa = document.getElementById('f_acct'), fp = document.getElementById('f_pan'), fc = document.getElementById('f_con');
+      if (fn) { fn.oninput = function () { F.name = fn.value; updateGenBtn(); }; }
+      if (fa) { fa.oninput = function () { F.acct = fa.value; updateGenBtn(); }; }
+      if (fp) { fp.oninput = function () { F.pan = fp.value; }; }
+      if (fc) { fc.oninput = function () { F.con = fc.value; }; }
 
-  /* Preset buttons */
-  document.querySelectorAll('.pre-btn').forEach(function(b){
-    b.onclick=function(){
-      var idx=b.dataset.pre;
-      if(idx==='clear'){F.name='';F.acct='';F.pan='';F.con='';render();return;}
-      var p=PRESETS[parseInt(idx)];
-      if(p){F.name=p.name;F.acct=p.acct;F.pan=p.pan;F.con=p.con;render();}
-    };
-  });
+      /* Preset buttons */
+      document.querySelectorAll('.pre-btn').forEach(function (b) {
+        b.onclick = function () {
+          var idx = b.dataset.pre;
+          if (idx === 'clear') { F.name = ''; F.acct = ''; F.pan = ''; F.con = ''; render(); return; }
+          var p = PRESETS[parseInt(idx)];
+          if (p) { F.name = p.name; F.acct = p.acct; F.pan = p.pan; F.con = p.con; render(); }
+        };
+      });
 
-  var gb=document.getElementById('gB');if(gb)gb.onclick=function(){S.step=3;render();};
-  var eb=document.getElementById('eB');if(eb)eb.onclick=function(){S.step=2;render();};
-  var pb=document.getElementById('pB');if(pb)pb.onclick=function(){window.print();};
-}
+      var gb = document.getElementById('gB'); if (gb) gb.onclick = function () { S.step = 3; render(); };
+      var eb = document.getElementById('eB'); if (eb) eb.onclick = function () { S.step = 2; render(); };
+      var pb = document.getElementById('pB'); if (pb) pb.onclick = function () { window.print(); };
+    }
 
-function updateGenBtn(){
-  var gb=document.getElementById('gB');
-  if(gb)gb.disabled=!(S.cm.partyName&&S.cm.amount&&S.cm.chequeNo&&F.name&&F.acct);
-}
+    function updateGenBtn() {
+      var gb = document.getElementById('gB');
+      if (gb) gb.disabled = !(S.cm.partyName && S.cm.amount && S.cm.chequeNo && F.name && F.acct);
+    }
 
-function hf(e){
-  var f=e.target.files[0];if(!f)return;
-  var rd=new FileReader();
-  rd.onload=function(ev){var wb=XLSX.read(ev.target.result,{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]],js=XLSX.utils.sheet_to_json(ws,{defval:''});if(js.length){S.hd=Object.keys(js[0]);S.rows=js;S.cm=amap(S.hd);S.step=2;render();}};
-  rd.readAsArrayBuffer(f);
-}
+    function hf(e) {
+      var f = e.target.files[0]; if (!f) return;
+      var rd = new FileReader();
+      rd.onload = function (ev) { var wb = XLSX.read(ev.target.result, { type: 'array' }), ws = wb.Sheets[wb.SheetNames[0]], js = XLSX.utils.sheet_to_json(ws, { defval: '' }); if (js.length) { S.hd = Object.keys(js[0]); S.rows = js; S.cm = amap(S.hd); S.step = 2; render(); } };
+      rd.readAsArrayBuffer(f);
+    }
 
-render();
-</script>
+    render();
+  </script>
 </body>
+
 </html>
